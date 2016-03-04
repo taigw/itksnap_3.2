@@ -181,6 +181,7 @@ SNAPLevelSetDriver<VDimension>
   // NarrowBand, ParallelSparseField, even Dense.  
   if(m_Parameters.GetSolver() == SnakeParameters::PARALLEL_SPARSE_FIELD_SOLVER)
     {
+
     // Define an extension to the appropriate filter class
     typedef ParallelSparseFieldLevelSetImageFilterBugFix<
         FloatImageType, FloatImageType> LevelSetFilterType;
@@ -222,6 +223,7 @@ SNAPLevelSetDriver<VDimension>
 */
   else if(m_Parameters.GetSolver() == SnakeParameters::DENSE_SOLVER)
     {
+
     // Define an extension to the appropriate filter class
     typedef itk::DenseFiniteDifferenceImageFilter<
       FloatImageType,FloatImageType> LevelSetFilterType;
@@ -251,7 +253,9 @@ SNAPLevelSetDriver<VDimension>
   // Update the largest possible region. The slicer may be changing the 
   // requested region on this image, so it's important that we always 
   // update the entire image
+    
   m_LevelSetFilter->UpdateLargestPossibleRegion();
+
 }
 
 template<unsigned int VDimension>
@@ -267,8 +271,8 @@ SNAPLevelSetDriver<VDimension>
   // Update the largest possible region. The slicer may be changing the 
   // requested region on this image, so it's important that we always 
   // update the entire image
-  m_LevelSetFilter->UpdateLargestPossibleRegion();
-}
+    
+    m_LevelSetFilter->UpdateLargestPossibleRegion();  }
 
 template<unsigned int VDimension>
 void 
@@ -282,7 +286,9 @@ SNAPLevelSetDriver<VDimension>
   // Update the largest possible region. The slicer may be changing the 
   // requested region on this image, so it's important that we always 
   // update the entire image
-  m_LevelSetFilter->UpdateLargestPossibleRegion();
+    
+    m_LevelSetFilter->UpdateLargestPossibleRegion();
+
 }
 
 template<unsigned int VDimension>

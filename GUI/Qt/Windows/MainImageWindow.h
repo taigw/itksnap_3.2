@@ -57,6 +57,9 @@ class QTimer;
 
 class SplashPanel;
 
+//
+class TRGPanel;
+
 #include <QDebug>
 
 namespace Ui {
@@ -319,7 +322,7 @@ private:
 
   // SNAP wizard panel (in right dock)
   SnakeWizardPanel *m_SnakeWizard;
-
+    TRGPanel * m_TRGPanel;
   Ui::MainImageWindow *ui;
 
   GlobalUIModel *m_Model;

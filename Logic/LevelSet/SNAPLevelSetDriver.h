@@ -198,6 +198,7 @@ private:
 
   /** Internal routines */
   void DoCreateLevelSetFilter();
+    
 };
 
 // Type definitions

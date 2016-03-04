@@ -39,6 +39,7 @@
 #include "ColorMapModel.h"
 #include "ViewPanel3D.h"
 #include "SnakeWizardPanel.h"
+#include "TRGPanel.h"
 #include "LatentITKEventNotifier.h"
 #include <QProgressDialog>
 #include "QtReporterDelegates.h"
@@ -155,6 +156,8 @@ MainImageWindow::MainImageWindow(QWidget *parent) :
         QDockWidget::DockWidgetFloatable |
         QDockWidget::DockWidgetMovable);
   this->addDockWidget(Qt::RightDockWidgetArea, m_DockRight);
+  
+  //m_TRGPanel=new TRGPanel(this);
 
   // Set up the recent items panels
   connect(ui->panelRecentImages, SIGNAL(RecentItemSelected(QString)),
