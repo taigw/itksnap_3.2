@@ -34,6 +34,7 @@
 class GenericSliceView;
 class SliceViewPanel;
 class GlobalUIModel;
+class QStackedWidget;
 class QDockWidget;
 class SnakeWizardPanel;
 class EventBucket;
@@ -141,6 +142,8 @@ private slots:
   void on_actionLabel_Editor_triggered();
 
   void onSnakeWizardFinished();
+    
+    void onTRGFinished();
 
   void on_actionUnload_All_triggered();
 
@@ -324,7 +327,8 @@ private:
 
   // SNAP wizard panel (in right dock)
   SnakeWizardPanel *m_SnakeWizard;
-    TRGPanel * m_TRGPanel;
+  TRGPanel * m_TRGPanel;
+  QStackedWidget * m_RightPanel;
   Ui::MainImageWindow *ui;
 
   GlobalUIModel *m_Model;

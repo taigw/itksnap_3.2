@@ -78,6 +78,7 @@
 #include <QItemDelegate>
 #include <QPainter>
 #include <QDockWidget>
+#include <QStackedWidget>
 #include <QMessageBox>
 #include <QDropEvent>
 #include <QDragEnterEvent>
@@ -153,13 +154,15 @@ MainImageWindow::MainImageWindow(QWidget *parent) :
   m_DockRight = new QDockWidget("Segment 3D", this);
   m_SnakeWizard = new SnakeWizardPanel(this);
   m_TRGPanel=new TRGPanel(this);
-  QWidget *dockWgtRight=new QWidget(this);
-  QHBoxLayout *dockRightLayout=new QHBoxLayout;
-  dockRightLayout->addWidget(m_SnakeWizard);
-  dockRightLayout->addWidget(m_TRGPanel);
-  dockWgtRight->setLayout(dockRightLayout);
+  m_RightPanel=new QStackedWidget(this);
+    m_RightPanel->addWidget(m_SnakeWizard);
+    m_RightPanel->addWidget(m_TRGPanel);
+//  QHBoxLayout *dockRightLayout=new QHBoxLayout;
+//  dockRightLayout->addWidget(m_SnakeWizard);
+//  dockRightLayout->addWidget(m_TRGPanel);
+//  dockWgtRight->setLayout(dockRightLayout);
     
-  m_DockRight->setWidget(dockWgtRight);
+  m_DockRight->setWidget(m_RightPanel);
   m_DockRight->setAllowedAreas(Qt::RightDockWidgetArea);
   m_DockRight->setFeatures(
         QDockWidget::DockWidgetFloatable |
@@ -192,6 +195,8 @@ MainImageWindow::MainImageWindow(QWidget *parent) :
   connect(m_SnakeWizard, SIGNAL(wizardFinished()),
           this, SLOT(onSnakeWizardFinished()));
 
+  connect(m_TRGPanel, SIGNAL(sgl_TRGFinished()),
+            this, SLOT(onTRGFinished()));
   // Make the margins adjust when the docks are attached
   connect(m_DockLeft, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)),
           this, SLOT(AdjustMarginsForDocks()));
@@ -726,8 +731,7 @@ void MainImageWindow::OpenSnakeWizard()
   m_SizeWithoutRightDock = this->size();
 
   // Make the dock containing the wizard visible
-    m_SnakeWizard->setVisible(true);
-    m_TRGPanel->setVisible(false);
+    m_RightPanel->setCurrentIndex(0);
     m_DockRight->setVisible(true);
 
 }
@@ -737,8 +741,7 @@ void MainImageWindow::OpenTRGPanel()
     this->m_TRGPanel->Initialize();
     m_SizeWithoutRightDock=this->size();
     
-    m_SnakeWizard->setVisible(false);
-    m_TRGPanel->setVisible(true);
+    m_RightPanel->setCurrentIndex(1);
     m_DockRight->setVisible(true);
     
 }
@@ -922,6 +925,14 @@ void MainImageWindow::onSnakeWizardFinished()
   // Return to previous size
   this->layout()->activate();
   resize(m_SizeWithoutRightDock.width(), m_SizeWithoutRightDock.height());
+}
+
+void MainImageWindow::onTRGFinished()
+{
+    m_DockRight->setVisible(false);
+    // Return to previous size
+    this->layout()->activate();
+    resize(m_SizeWithoutRightDock.width(), m_SizeWithoutRightDock.height());
 }
 
 void MainImageWindow::on_actionUnload_All_triggered()

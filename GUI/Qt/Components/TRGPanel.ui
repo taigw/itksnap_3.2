@@ -47,21 +47,21 @@
        <number>5</number>
       </property>
       <item>
-       <widget class="QPushButton" name="setThresholdButton">
+       <widget class="QPushButton" name="btnSetThreshold">
         <property name="text">
          <string>Set Threshold</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="addSeedsButton">
+       <widget class="QPushButton" name="btnAddSeeds">
         <property name="text">
          <string>Add Seeds</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="updateButton">
+       <widget class="QPushButton" name="btnUpdate">
         <property name="text">
          <string>Update</string>
         </property>
@@ -84,7 +84,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QPushButton" name="cancelButton">
+    <widget class="QPushButton" name="btnCancel">
      <property name="text">
       <string>Cancel Segmentation</string>
      </property>

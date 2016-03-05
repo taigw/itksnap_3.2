@@ -19,11 +19,13 @@ public:
     
     void SetModel(GlobalUIModel *model);
     void Initialize();
+signals:
+    void sgl_TRGFinished();
 private slots:
-    void slt_btnSetThreshold_clicked();
-    void slt_btnAddSeeds_clicked();
-    void slt_btnUpdate_clicked();
-    void slt_btnCancelSegmentation_clicked();
+    void on_btnSetThreshold_clicked();
+    void on_btnAddSeeds_clicked();
+    void on_btnUpdate_clicked();
+    void on_btnCancel_clicked();
 private:
     Ui::TRGPanel *ui;
     

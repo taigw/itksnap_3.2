@@ -33,19 +33,19 @@ void TRGPanel::Initialize()
     
 }
 
-void TRGPanel::slt_btnSetThreshold_clicked()
+void TRGPanel::on_btnSetThreshold_clicked()
 {
     
 }
-void TRGPanel::slt_btnAddSeeds_clicked()
+void TRGPanel::on_btnAddSeeds_clicked()
 {
     
 }
-void TRGPanel::slt_btnUpdate_clicked()
+void TRGPanel::on_btnUpdate_clicked()
 {
     
 }
-void TRGPanel::slt_btnCancelSegmentation_clicked()
+void TRGPanel::on_btnCancel_clicked()
 {
-    
+    emit sgl_TRGFinished();
 }
