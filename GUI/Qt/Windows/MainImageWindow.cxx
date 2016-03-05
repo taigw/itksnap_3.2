@@ -105,6 +105,8 @@ MainImageWindow::MainImageWindow(QWidget *parent) :
   ui->actionPolygon->setActionGroup(grpToolbarMain);
   ui->actionPaintbrush->setActionGroup(grpToolbarMain);
   ui->actionSnake->setActionGroup(grpToolbarMain);
+  ui->actionTRG->setActionGroup(grpToolbarMain);
+  
 
   QActionGroup *grpToolbar3D = new QActionGroup(this);
   ui->action3DTrackball->setActionGroup(grpToolbar3D);
@@ -150,7 +152,14 @@ MainImageWindow::MainImageWindow(QWidget *parent) :
 
   m_DockRight = new QDockWidget("Segment 3D", this);
   m_SnakeWizard = new SnakeWizardPanel(this);
-  m_DockRight->setWidget(m_SnakeWizard);
+  m_TRGPanel=new TRGPanel(this);
+  QWidget *dockWgtRight=new QWidget(this);
+  QHBoxLayout *dockRightLayout=new QHBoxLayout;
+  dockRightLayout->addWidget(m_SnakeWizard);
+  dockRightLayout->addWidget(m_TRGPanel);
+  dockWgtRight->setLayout(dockRightLayout);
+    
+  m_DockRight->setWidget(dockWgtRight);
   m_DockRight->setAllowedAreas(Qt::RightDockWidgetArea);
   m_DockRight->setFeatures(
         QDockWidget::DockWidgetFloatable |
@@ -717,7 +726,21 @@ void MainImageWindow::OpenSnakeWizard()
   m_SizeWithoutRightDock = this->size();
 
   // Make the dock containing the wizard visible
-  m_DockRight->setVisible(true);
+    m_SnakeWizard->setVisible(true);
+    m_TRGPanel->setVisible(false);
+    m_DockRight->setVisible(true);
+
+}
+
+void MainImageWindow::OpenTRGPanel()
+{
+    this->m_TRGPanel->Initialize();
+    m_SizeWithoutRightDock=this->size();
+    
+    m_SnakeWizard->setVisible(false);
+    m_TRGPanel->setVisible(true);
+    m_DockRight->setVisible(true);
+    
 }
 
 void MainImageWindow::AdjustMarginsForDocks()

@@ -19,12 +19,15 @@ public:
   ~SnakeToolROIPanel();
 
   void SetModel(GlobalUIModel *);
-
+    //
+    void SetSnakeSegMode();
+    void SetTRGSegMode();
 private slots:
   void on_btnResetROI_clicked();
 
   void on_btnAuto_clicked();
-
+ 
+  void on_trgSegButton_clicked();
 private:
   Ui::SnakeToolROIPanel *ui;
 

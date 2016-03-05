@@ -95,7 +95,7 @@ MainControlPanel::MainControlPanel(MainImageWindow *parent) :
 
   // The mode toolbar
   QToolBar *toolbar = new QToolBar(this);
-  ui->panelToolbarMode->layout()->addWidget(toolbar);  
+  ui->panelToolbarMode->layout()->addWidget(toolbar);
   toolbar->addActions(parent->GetMainToolActionGroup()->actions());
 
   // The action toolbar
@@ -161,13 +161,16 @@ void MainControlPanel::onModelUpdate(const EventBucket &bucket)
     ui->pageBlank,
     ui->pagePaintbrushTool,
     ui->pageSnakeTool,
-    ui->pageBlank};
+    ui->pageSnakeTool};
 
   // Respond to changes in toolbar mode
   GlobalState *gs = m_Model->GetGlobalState();
   if(bucket.HasEvent(ValueChangedEvent(), gs->GetToolbarModeModel()))
     {
     int mode = (int) gs->GetToolbarMode();
+    
+    if(mode==4)ui->pageSnakeTool->SetSnakeSegMode();
+    if(mode==5)ui->pageSnakeTool->SetTRGSegMode();
     mode_inspector_btn[mode]->click();
     ui->stackToolPage->setCurrentWidget(mode_tool_pages[mode]);
     }

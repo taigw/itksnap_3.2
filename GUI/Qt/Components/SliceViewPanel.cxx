@@ -348,7 +348,10 @@ void SliceViewPanel::OnToolbarModeChange()
       ovTiled.push_back(ui->imPaintbrush->GetRenderer());
       break;
     case ANNOTATION_MODE:
+      ConfigureEventChain(ui->imSnakeROI);
+      ovTiled.push_back(ui->imSnakeROI->GetRenderer());
       break;
+      //break;
     case ROI_MODE:
       ConfigureEventChain(ui->imSnakeROI);
       ovTiled.push_back(ui->imSnakeROI->GetRenderer());

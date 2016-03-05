@@ -43,6 +43,18 @@ void SnakeToolROIPanel::SetModel(GlobalUIModel *model)
         model->GetSnakeROISizeModel());
 }
 
+void SnakeToolROIPanel::SetSnakeSegMode()
+{
+    ui->btnAuto->setVisible(true);
+    ui->trgSegButton->setVisible(false);
+}
+
+void SnakeToolROIPanel::SetTRGSegMode()
+{
+    ui->btnAuto->setVisible(false);
+    ui->trgSegButton->setVisible(true);
+}
+
 void SnakeToolROIPanel::on_btnResetROI_clicked()
 {
   // Reset the ROI
@@ -72,4 +84,11 @@ void SnakeToolROIPanel::on_btnAuto_clicked()
   // Show the snake panel
   MainImageWindow *main = findParentWidget<MainImageWindow>(this);
   main->OpenSnakeWizard();
+}
+
+void SnakeToolROIPanel::on_trgSegButton_clicked()
+{
+    // Show the snake panel
+    MainImageWindow *main = findParentWidget<MainImageWindow>(this);
+    main->OpenTRGPanel();
 }

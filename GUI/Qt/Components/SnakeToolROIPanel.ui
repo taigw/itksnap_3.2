@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>215</width>
+    <width>202</width>
     <height>439</height>
    </rect>
   </property>
@@ -315,11 +315,36 @@ font-size: 11px;
          </font>
         </property>
         <property name="text">
-         <string>Segment 3D</string>
+         <string>Snake Segment </string>
         </property>
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item alignment="Qt::AlignHCenter">
+    <widget class="QPushButton" name="trgSegButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>135</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>TRG Segment</string>
+     </property>
     </widget>
    </item>
    <item>

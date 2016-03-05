@@ -87,6 +87,8 @@ public:
 
   // Initiate active contour segmentation
   void OpenSnakeWizard();
+    
+  void OpenTRGPanel();
 
   // Load a drag-n-dropped file
   void LoadDroppedFile(QString file);
