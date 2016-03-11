@@ -88,6 +88,21 @@ void SnakeToolROIPanel::on_btnAuto_clicked()
 
 void SnakeToolROIPanel::on_trgSegButton_clicked()
 {
+    if(ui->chkResample->isChecked())
+    {
+        if(m_ResampleDialog->exec() != QDialog::Accepted)
+            return;
+    }
+    else
+    {
+        // Make sure that no interpolation is applied
+        m_Model->GetSnakeROIResampleModel()->Reset();
+        m_Model->GetSnakeROIResampleModel()->Accept();
+    }
+    
+    // Switch to crosshairs mode
+    m_Model->GetGlobalState()->SetToolbarMode(CROSSHAIRS_MODE);
+    
     // Show the snake panel
     MainImageWindow *main = findParentWidget<MainImageWindow>(this);
     main->OpenTRGPanel();

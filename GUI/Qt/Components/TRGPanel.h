@@ -8,6 +8,7 @@ namespace Ui {
 }
 
 class GlobalUIModel;
+class SnakeWizardModel;
 
 class TRGPanel: public QWidget
 {
@@ -30,5 +31,6 @@ private:
     Ui::TRGPanel *ui;
     
     GlobalUIModel *m_ParentModel;
+    SnakeWizardModel *m_Model;
 };
 #endif // TRGPANEL_H

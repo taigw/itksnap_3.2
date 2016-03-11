@@ -39,6 +39,7 @@
 #endif
 
 #include "SNAPLevelSetDriver.h"
+#include "itkBinaryThresholdImageFilter.h"
 #include "itkGroupSpatialObject.h"
 #include "itkEllipseSpatialObject.h"
 #include "itkSpatialObjectToImageFilter.h"
@@ -47,6 +48,7 @@
 #include "itkSubtractImageFilter.h"
 #include "itkUnaryFunctorImageFilter.h"
 #include "itkFastMutexLock.h"
+#include "itkImageFileWriter.h"
 
 #include "SmoothBinaryThresholdImageFilter.h"
 #include "GlobalState.h"
@@ -286,13 +288,13 @@ SNAPImageData
   // At this point, we should have an initialization image and a bounding
   // box in bbLower and bbUpper.  End the routine if there are no initialization
   // voxels
-  if (nInitVoxels == 0) 
-    {
-    this->RemoveImageWrapper(SNAP_ROLE, m_SnakeWrapper);
-    m_SnakeWrapper = NULL;
-    InvokeEvent(LayerChangeEvent());
-    return false;
-    }
+//  if (nInitVoxels == 0) 
+//    {
+//    this->RemoveImageWrapper(SNAP_ROLE, m_SnakeWrapper);
+//    m_SnakeWrapper = NULL;
+//    InvokeEvent(LayerChangeEvent());
+//    return false;
+//    }
 
   // Make sure that the correct color label is being used
   // TODO: restore this functionality once you figure out how to display
@@ -397,6 +399,89 @@ SNAPImageData
   m_SnakeWrapper->SetAlpha(
         (unsigned char)(255 * m_Parent->GetGlobalState()->GetSegmentationAlpha()));
 
+}
+
+void
+SNAPImageData
+::ThresholdSegmentation()
+{
+    //InitializeSegmentation(<#const SnakeParameters &parameters#>, <#const std::vector<Bubble> &bubbles#>, <#unsigned int labelColor#>);
+    //InitializeSpeed();
+    
+    LabelImageType::Pointer labelImg = m_LabelWrapper->GetImage();
+    typedef itk::Image<short,3>  MainImageType;
+    MainImageType* mainImg= (MainImageType *) m_MainImageWrapper->GetImageBase();
+
+    
+    // Get the target region. This really should be a region relative to the IRIS image
+    // data, not an image into a needless copy of an IRIS region.
+    LabelImageType::RegionType region = labelImg->GetBufferedRegion();
+    
+    // Create iterators to perform the copy
+    typedef itk::ImageRegionConstIterator<MainImageType> SourceIterator;
+    typedef itk::ImageRegionIteratorWithIndex<LabelImageType> TargetIterator;
+    SourceIterator itSource(mainImg,region);
+    TargetIterator itTarget(labelImg,region);
+    
+//    // During the copy loop, compute the extents of the initialization
+//    Vector3l bbLower = region.GetSize();
+//    Vector3l bbUpper = region.GetIndex();
+//    
+//    unsigned long nInitVoxels = 0;
+    
+    // Convert the input label image into a binary function whose 0 level set
+    // is the boundary of the current label's region
+    while(!itSource.IsAtEnd())
+    {
+//        if(itSource.Value() == m_SnakeColorLabel)
+//        {
+//            // Expand the bounding box accordingly
+//            Vector3l point = itTarget.GetIndex();
+//            bbLower = vector_min(bbLower,point);
+//            bbUpper = vector_max(bbUpper,point);
+//            
+//            // Increase the number of initialization voxels
+//            nInitVoxels++;
+//            
+//            // Set the target value to inside
+//            itTarget.Value() = 1;
+//        }
+        if(itSource.Value()<0)
+        {
+            itTarget.Value()=0;
+        }
+        else{
+            itTarget.Value()=1;
+        }
+        
+        // Go to the next pixel
+        ++itTarget; ++itSource;
+    }
+    //SetSegmentationImage(labelImg);
+    
+//    typedef itk::Image<short, 3>  ImageType;
+//    typedef itk::Image<unsigned char, 3> LabelType;
+//    ImageType * mainImg=(ImageType *) m_MainImageWrapper->GetImageBase();
+//    
+//    typedef itk::BinaryThresholdImageFilter <ImageType, LabelType>
+//    BinaryThresholdImageFilterType;
+//    
+//    BinaryThresholdImageFilterType::Pointer thresholdFilter
+//    = BinaryThresholdImageFilterType::New();
+//    thresholdFilter->SetInput(mainImg);
+//    thresholdFilter->SetLowerThreshold(0);
+//    thresholdFilter->SetUpperThreshold(500);
+//    thresholdFilter->SetInsideValue(1);
+//    thresholdFilter->SetOutsideValue(0);
+//    
+//    thresholdFilter->Update();
+//    LabelType* output=thresholdFilter->GetOutput();
+//    SetSegmentationImage((LabelImageType *)output);
+//    typedef  itk::ImageFileWriter< LabelType  > WriterType;
+//    WriterType::Pointer writer = WriterType::New();
+//    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
+//    writer->SetInput(output);
+//    writer->Update();
 }
 
 void 

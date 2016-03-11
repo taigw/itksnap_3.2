@@ -308,6 +308,7 @@ void MainImageWindow::Initialize(GlobalUIModel *model)
   m_LabelEditor->SetModel(model->GetLabelEditorModel());
   m_LayerInspector->SetModel(model);
   m_SnakeWizard->SetModel(model);
+    m_TRGPanel->SetModel(model);
   m_ReorientImageDialog->SetModel(model->GetReorientImageModel());
   m_DropDialog->SetModel(model);
   m_StatisticsDialog->SetModel(model);

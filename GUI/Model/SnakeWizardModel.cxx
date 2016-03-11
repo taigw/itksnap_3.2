@@ -1049,6 +1049,35 @@ void SnakeWizardModel::OnSnakeModeEnter()
   m_PreprocessingModeModel->SetValue(lastMode);
 }
 
+void SnakeWizardModel::OnTRGModeEnter()
+{
+    // Initialize the image data
+    m_Driver->InitializeSNAPImageData(
+                                      m_Driver->GetGlobalState()->GetSegmentationROISettings(),
+                                      m_Parent->GetProgressCommand());
+    //m_Driver->InitializeActiveContourPipeline();
+    
+    m_Driver->SetCurrentImageDataToSNAP();
+    
+    // Some preparatory stuff
+    this->ComputeBubbleRadiusDefaultAndRange();
+    
+    // Reset the bubbles
+    m_Driver->GetBubbleArray().clear();
+    m_GlobalState->UnsetActiveBubble();
+    
+    // We begin in preprocessing mode
+    //SetInteractionMode(MODE_PREPROCESSING);
+    SetInteractionMode(MODE_NONE);
+    
+    // Set the current preprocessing mode.
+    PreprocessingMode lastMode = m_GlobalState->GetLastUsedPreprocessingMode();
+    m_PreprocessingModeModel->SetValue(lastMode);
+    
+    m_Driver->GetSNAPImageData()->ThresholdSegmentation();
+}
+
+
 void SnakeWizardModel::ComputeBubbleRadiusDefaultAndRange()
 {
   // Set bubble radius range according to volume dimensions (world dimensions)
@@ -1229,6 +1258,51 @@ void SnakeWizardModel::OnEvolutionPageFinish()
   m_Driver->ReleaseSNAPImageData();
 }
 
+void SnakeWizardModel::OnTRGFinish()
+{
+    // Stop the segmentation pipeline
+    if(m_Driver->GetSNAPImageData()->IsSegmentationActive())
+        m_Driver->GetSNAPImageData()->TerminateSegmentation();
+    
+    // Update IRIS with SNAP images
+//    m_Driver->UpdateIRISWithSnapImageData(NULL);
+    m_Driver->myUpdateIRISWithSnapImageData();
+    
+    // Set an undo point
+    m_Driver->StoreUndoPoint("Automatic Segmentation");
+    m_PreprocessingModeModel->SetValue(PREPROCESS_NONE);
+    // Return to IRIS mode
+    m_Driver->SetCurrentImageDataToIRIS();
+//    
+//    LabelImageType::Pointer imgNewLabel =
+//    m_IRISImageData->GetSegmentation()->DeepCopyRegion(roiLabel,progressCommand);
+//    
+//    // Filter the segmentation image to only allow voxels of 0 intensity and
+//    // of the current drawing color
+//    LabelType passThroughLabel = m_GlobalState->GetDrawingColorLabel();
+//    
+//    typedef itk::ImageRegionIterator<LabelImageType> IteratorType;
+//    IteratorType itLabel(imgNewLabel,imgNewLabel->GetBufferedRegion());
+//    unsigned int nCopied = 0;
+//    while(!itLabel.IsAtEnd())
+//    {
+//        if(itLabel.Value() != passThroughLabel)
+//            itLabel.Value() = (LabelType) 0;
+//        else
+//            nCopied++;
+//        ++itLabel;
+//    }
+//    
+//    // Record whether the segmentation has any values that are not zero
+//    m_GlobalState->SetSnakeInitializedWithManualSegmentation(nCopied > 0);
+//    
+//    // Pass the cleaned up segmentation image to SNAP
+//    m_SNAPImageData->SetSegmentationImage(imgNewLabel);
+
+//    m_Driver->GetIRISImageData()->SetSegmentationImage(<#LabelImageType *newLabelImage#>)
+    m_Driver->ReleaseSNAPImageData();
+}
+
 void SnakeWizardModel::OnCancelSegmentation()
 {
   // Stop the segmentation pipeline
@@ -1237,7 +1311,8 @@ void SnakeWizardModel::OnCancelSegmentation()
 
   // Leave the preprocessing mode
   m_PreprocessingModeModel->SetValue(PREPROCESS_NONE);
-
+    
+    
   // Return to IRIS mode
   m_Driver->SetCurrentImageDataToIRIS();
   m_Driver->ReleaseSNAPImageData();

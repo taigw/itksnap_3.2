@@ -239,6 +239,7 @@ IRISApplication
   InvokeEvent(LayerChangeEvent());
 }
 
+
 void 
 IRISApplication
 ::SetDisplayGeometry(const IRISDisplayGeometry &dispGeom)
@@ -683,6 +684,139 @@ IRISApplication
 
   // The target has been modified
   target->Modified();
+}
+
+void IRISApplication::myUpdateIRISWithSnapImageData()
+{
+    assert(IsSnakeModeActive());
+    
+
+    typedef LabelImageWrapper::ImageType SegImageType;
+    
+    // If the voxel size of the image does not match the voxel size of the
+    // main image, we need to resample the region
+    SegImageType * source = (SegImageType *) m_SNAPImageData->GetSegmentation()->GetImageBase();
+    SegImageType::Pointer target = m_IRISImageData->GetSegmentation()->GetImage();
+    
+    // Construct are region of interest into which the result will be pasted
+    SNAPSegmentationROISettings roi = m_GlobalState->GetSegmentationROISettings();
+    
+    // If the ROI has been resampled, resample the segmentation in reverse direction
+    if(roi.IsResampling())
+    {
+        // Create a resampling filter
+        typedef itk::ResampleImageFilter<SegImageType,SegImageType> ResampleFilterType;
+        ResampleFilterType::Pointer fltSample = ResampleFilterType::New();
+        
+        // Initialize the resampling filter with an identity transform
+        fltSample->SetInput(source);
+        fltSample->SetTransform(itk::IdentityTransform<double,3>::New());
+        
+        // Typedefs for interpolators
+        typedef itk::NearestNeighborInterpolateImageFunction<
+        SegImageType,double> NNInterpolatorType;
+        typedef itk::LinearInterpolateImageFunction<
+        SegImageType,double> LinearInterpolatorType;
+        typedef itk::BSplineInterpolateImageFunction<
+        SegImageType,double> CubicInterpolatorType;
+        
+        // More typedefs are needed for the sinc interpolator
+        const unsigned int VRadius = 5;
+        typedef itk::Function::HammingWindowFunction<VRadius> WindowFunction;
+        typedef itk::ConstantBoundaryCondition<SegImageType> Condition;
+        typedef itk::WindowedSincInterpolateImageFunction<
+        SegImageType, VRadius,
+        WindowFunction, Condition, double> SincInterpolatorType;
+        
+        // Choose the interpolator
+        switch(roi.GetInterpolationMethod())
+        {
+            case SNAPSegmentationROISettings::NEAREST_NEIGHBOR :
+                fltSample->SetInterpolator(NNInterpolatorType::New());
+                break;
+                
+            case SNAPSegmentationROISettings::TRILINEAR :
+                fltSample->SetInterpolator(LinearInterpolatorType::New());
+                break;
+                
+            case SNAPSegmentationROISettings::TRICUBIC :
+                fltSample->SetInterpolator(CubicInterpolatorType::New());
+                break;
+                
+            case SNAPSegmentationROISettings::SINC_WINDOW_05 :
+                fltSample->SetInterpolator(SincInterpolatorType::New());
+                break;
+        };
+        
+        // Set the image sizes and spacing. We are creating an image of the
+        // dimensions of the ROI defined in the IRIS image space.
+        fltSample->SetSize(roi.GetROI().GetSize());
+        fltSample->SetOutputSpacing(target->GetSpacing());
+        fltSample->SetOutputOrigin(source->GetOrigin());
+        fltSample->SetOutputDirection(source->GetDirection());
+        
+//        // Watch the segmentation progress
+//        if(progressCommand)
+//            fltSample->AddObserver(itk::AnyEvent(),progressCommand);
+        
+        // Set the unknown intensity to positive value
+        fltSample->SetDefaultPixelValue(4.0f);
+        
+        // Perform resampling
+        fltSample->UpdateLargestPossibleRegion();
+        
+        // Change the source to the output
+        source = fltSample->GetOutput();
+    }
+    
+    // Create iterators for copying from one to the other
+    typedef itk::ImageRegionConstIterator<SegImageType> SourceIteratorType;
+    typedef itk::ImageRegionIterator<SegImageType> TargetIteratorType;
+    SourceIteratorType itSource(source,source->GetLargestPossibleRegion());
+    TargetIteratorType itTarget(target,roi.GetROI());
+    
+    // Figure out which color draws and which color is clear
+    unsigned int iClear = m_GlobalState->GetPolygonInvert() ? 1 : 0;
+    
+    // Construct a merge table that contains an output intensity for every
+    // possible combination of two input intensities (note that snap image only
+    // has two possible intensities
+    LabelType mergeTable[2][MAX_COLOR_LABELS];
+    
+    // Perform the merge
+    for(unsigned int i=0;i<MAX_COLOR_LABELS;i++)
+    {
+        // Whe the SNAP image is clear, IRIS passes through to the output
+        // except for the IRIS voxels of the drawing color, which get cleared out
+        mergeTable[iClear][i] = (i!=m_GlobalState->GetDrawingColorLabel()) ? i : 0;
+        
+        // If mode is paint over all, the victim is overridden
+        mergeTable[1-iClear][i] = DrawOverLabel((LabelType) i);
+    }
+    
+    // Go through both iterators, copy the new over the old
+    itSource.GoToBegin();
+    itTarget.GoToBegin();
+    while(!itSource.IsAtEnd())
+    {
+        // Get the two voxels
+        //LabelType &voxIRIS = itTarget.Value();
+        float voxSNAP = itSource.Value();
+        
+        // Check that we're ok (debug mode only)
+        assert(!itTarget.IsAtEnd());
+        
+        // Perform the merge
+        //voxIRIS = mergeTable[voxSNAP <= 0 ? 1 : 0][voxIRIS];
+        itTarget.Value()=voxSNAP;
+        
+        // Iterate
+        ++itSource;
+        ++itTarget;
+    }
+    
+    // The target has been modified
+    target->Modified();
 }
 
 void
@@ -2554,10 +2688,12 @@ bool IRISApplication::InitializeActiveContourPipeline()
     {
     // Fire an event indicating the layers have changed
     InvokeEvent(LayerChangeEvent());
+        cout<<"InitializeActiveContourPipeline true"<<endl;
     return true;
     }
 
-  return false;
+    cout<<"InitializeActiveContourPipeline false"<<endl;
+    return false;
 }
 
 

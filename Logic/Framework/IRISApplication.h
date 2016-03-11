@@ -321,6 +321,8 @@ public:
    */
   void UpdateIRISWithSnapImageData(CommandType *progressCommand = NULL);
 
+    //wgt
+    void myUpdateIRISWithSnapImageData();
   /**
    * Get the segmentation label data
    */
@@ -544,6 +546,8 @@ public:
 
   /** Get the preset manager for color maps */
   irisGetMacro(ColorMapPresetManager, ColorMapPresetManager *)
+    
+    
 
   // ----------------------- Project support ------------------------------
 
