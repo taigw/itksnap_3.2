@@ -213,7 +213,7 @@ public:
 
   //wgt
     void ResetSpeedImage();
-    void ThresholdSegmentation();
+    void ThresholdedRegionGrowSegmentation(double lower, double upper);
     void SaveSpeedImage();
 protected:
 

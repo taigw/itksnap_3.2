@@ -426,101 +426,161 @@ void SNAPImageData::ResetSpeedImage()
 
 void
 SNAPImageData
-::ThresholdSegmentation()
+::ThresholdedRegionGrowSegmentation(double lower, double upper)
 {
-    //InitializeSegmentation(<#const SnakeParameters &parameters#>, <#const std::vector<Bubble> &bubbles#>, <#unsigned int labelColor#>);
-    //InitializeSpeed();
-    
-    SpeedImageType::Pointer speedImg = m_SpeedWrapper->GetImage();
-    LabelImageType::Pointer labelImg = m_LabelWrapper->GetImage();
-    typedef itk::Image<short,3>  MainImageType;
-    MainImageType* mainImg= (MainImageType *) m_MainImageWrapper->GetImageBase();
-
-    
-    // Get the target region. This really should be a region relative to the IRIS image
-    // data, not an image into a needless copy of an IRIS region.
-    LabelImageType::RegionType region = labelImg->GetBufferedRegion();
-    
-    // Create iterators to perform the copy
-    typedef itk::ImageRegionConstIterator<MainImageType> SourceIterator;
-    typedef itk::ImageRegionIteratorWithIndex<LabelImageType> TargetIterator;
-    SourceIterator itSource(mainImg,region);
-    TargetIterator itTarget(labelImg,region);
-    
-//    // During the copy loop, compute the extents of the initialization
-//    Vector3l bbLower = region.GetSize();
-//    Vector3l bbUpper = region.GetIndex();
+//    //InitializeSegmentation(<#const SnakeParameters &parameters#>, <#const std::vector<Bubble> &bubbles#>, <#unsigned int labelColor#>);
+//    //InitializeSpeed();
 //    
-//    unsigned long nInitVoxels = 0;
-    
-    // Convert the input label image into a binary function whose 0 level set
-    // is the boundary of the current label's region
-    while(!itSource.IsAtEnd())
-    {
-//        if(itSource.Value() == m_SnakeColorLabel)
-//        {
-//            // Expand the bounding box accordingly
-//            Vector3l point = itTarget.GetIndex();
-//            bbLower = vector_min(bbLower,point);
-//            bbUpper = vector_max(bbUpper,point);
-//            
-//            // Increase the number of initialization voxels
-//            nInitVoxels++;
-//            
-//            // Set the target value to inside
-//            itTarget.Value() = 1;
-//        }
-        LabelImageType::IndexType idx=itTarget.GetIndex();
-        float speed=speedImg->GetPixel(idx);
+//    SpeedImageType::Pointer speedImg = m_SpeedWrapper->GetImage();
+//    LabelImageType::Pointer labelImg = m_LabelWrapper->GetImage();
+//    typedef itk::Image<short,3>  MainImageType;
+//    MainImageType* mainImg= (MainImageType *) m_MainImageWrapper->GetImageBase();
 //
-//        if(itSource.Value()<0)
+//    
+//    // Get the target region. This really should be a region relative to the IRIS image
+//    // data, not an image into a needless copy of an IRIS region.
+//    LabelImageType::RegionType region = labelImg->GetBufferedRegion();
+//    
+//    // Create iterators to perform the copy
+//    typedef itk::ImageRegionConstIterator<MainImageType> SourceIterator;
+//    typedef itk::ImageRegionIteratorWithIndex<LabelImageType> TargetIterator;
+//    SourceIterator itSource(mainImg,region);
+//    TargetIterator itTarget(labelImg,region);
+//    
+////    // During the copy loop, compute the extents of the initialization
+////    Vector3l bbLower = region.GetSize();
+////    Vector3l bbUpper = region.GetIndex();
+////    
+////    unsigned long nInitVoxels = 0;
+//    
+//    // Convert the input label image into a binary function whose 0 level set
+//    // is the boundary of the current label's region
+//    while(!itSource.IsAtEnd())
+//    {
+////        if(itSource.Value() == m_SnakeColorLabel)
+////        {
+////            // Expand the bounding box accordingly
+////            Vector3l point = itTarget.GetIndex();
+////            bbLower = vector_min(bbLower,point);
+////            bbUpper = vector_max(bbUpper,point);
+////            
+////            // Increase the number of initialization voxels
+////            nInitVoxels++;
+////            
+////            // Set the target value to inside
+////            itTarget.Value() = 1;
+////        }
+//        LabelImageType::IndexType idx=itTarget.GetIndex();
+//        float speed=speedImg->GetPixel(idx);
+////
+////        if(itSource.Value()<0)
+////        {
+////            itTarget.Value()=0;
+////        }
+////        else{
+////            itTarget.Value()=1;
+////        }
+//        if(speed<0)
 //        {
 //            itTarget.Value()=0;
 //        }
-//        else{
+//        else
+//        {
 //            itTarget.Value()=1;
 //        }
-        if(speed<0)
+//        
+//        // Go to the next pixel
+//        ++itTarget; ++itSource;
+//    }
+//    //SetSegmentationImage(labelImg);
+// 
+//    
+////    //Threshold Segmentation
+////    typedef itk::Image<short, 3>  ImageType;
+//    typedef itk::Image<unsigned short, 3> LabelType;
+////
+////    typedef itk::BinaryThresholdImageFilter <ImageType, LabelType>
+////    BinaryThresholdImageFilterType;
+////    
+////    BinaryThresholdImageFilterType::Pointer thresholdFilter
+////    = BinaryThresholdImageFilterType::New();
+////    thresholdFilter->SetInput(mainImg);
+////    thresholdFilter->SetLowerThreshold(0);
+////    thresholdFilter->SetUpperThreshold(200);
+////    thresholdFilter->SetInsideValue(1);
+////    thresholdFilter->SetOutsideValue(0);
+////    
+////    thresholdFilter->Update();
+////    LabelType* output=thresholdFilter->GetOutput();
+////    SetSegmentationImage((LabelImageType *)output);
+//    
+//    typedef  itk::ImageFileWriter< LabelType  > WriterType;
+//    WriterType::Pointer writer = WriterType::New();
+//    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
+////    writer->SetInput(output);
+//    writer->SetInput(labelImg);
+//    writer->Update();
+//    cout<<"segmentation result has been saved"<<endl;
+    
+    typedef itk::Image<short,3>  MainImageType;
+    MainImageType* mainImg= (MainImageType *) m_MainImageWrapper->GetImageBase();
+    LabelImageWrapper::ImagePointer imgSeg = GetSegmentation()->GetImage();
+    typedef LabelImageWrapper::ImageType::RegionType::IndexType IndexType;
+    std::vector<IndexType> indexList;
+    typedef itk::ImageRegionIteratorWithIndex<LabelImageType> TargetIterator;
+    TargetIterator itTarget(imgSeg,imgSeg->GetLargestPossibleRegion());
+    
+    for(itTarget.GoToBegin();!itTarget.IsAtEnd();++itTarget)
+    {
+        if(itTarget.Get()>0)
         {
-            itTarget.Value()=0;
+            double pixelValue=mainImg->GetPixel(itTarget.GetIndex());
+            if(pixelValue>=lower && pixelValue<=upper)
+            {
+                indexList.push_back(itTarget.GetIndex());
+            }
+            else{
+                itTarget.Set(0);
+            }
         }
-        else
+    }
+    
+    int xoff[6]={-1,1,0,0,0,0};
+    int yoff[6]={ 0,0,-1,1,0,0};
+    int zoff[6]={ 0,0,0,0,-1,1};
+    LabelImageWrapper::ImageType::RegionType::SizeType regionSize=imgSeg->GetLargestPossibleRegion().GetSize();
+    while(indexList.size()>0)
+    {
+        IndexType tempidx=indexList[indexList.size()-1];
+        indexList.pop_back();
+        for (int i=0;i<6;i++)
         {
-            itTarget.Value()=1;
+            IndexType neighbourIdx;
+            neighbourIdx[0]=tempidx[0]+xoff[i];
+            neighbourIdx[1]=tempidx[1]+yoff[i];
+            neighbourIdx[2]=tempidx[2]+zoff[i];
+            if(neighbourIdx[0]>=0 && neighbourIdx[0]<regionSize[0] &&
+               neighbourIdx[1]>=0 && neighbourIdx[1]<regionSize[1] &&
+               neighbourIdx[2]>=0 && neighbourIdx[2]<regionSize[2] && imgSeg->GetPixel(neighbourIdx)==0)
+            {
+                double pixelValue=mainImg->GetPixel(neighbourIdx);
+                if(pixelValue>=lower && pixelValue<=upper)
+                {
+                    imgSeg->SetPixel(neighbourIdx, 1);
+                    indexList.push_back(neighbourIdx);
+                }
+            }
         }
         
-        // Go to the next pixel
-        ++itTarget; ++itSource;
     }
-    //SetSegmentationImage(labelImg);
- 
     
-//    //Threshold Segmentation
-//    typedef itk::Image<short, 3>  ImageType;
-    typedef itk::Image<unsigned short, 3> LabelType;
-//
-//    typedef itk::BinaryThresholdImageFilter <ImageType, LabelType>
-//    BinaryThresholdImageFilterType;
-//    
-//    BinaryThresholdImageFilterType::Pointer thresholdFilter
-//    = BinaryThresholdImageFilterType::New();
-//    thresholdFilter->SetInput(mainImg);
-//    thresholdFilter->SetLowerThreshold(0);
-//    thresholdFilter->SetUpperThreshold(200);
-//    thresholdFilter->SetInsideValue(1);
-//    thresholdFilter->SetOutsideValue(0);
-//    
-//    thresholdFilter->Update();
-//    LabelType* output=thresholdFilter->GetOutput();
-//    SetSegmentationImage((LabelImageType *)output);
-    
-    typedef  itk::ImageFileWriter< LabelType  > WriterType;
-    WriterType::Pointer writer = WriterType::New();
-    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
-//    writer->SetInput(output);
-    writer->SetInput(labelImg);
-    writer->Update();
-    cout<<"segmentation result has been saved"<<endl;
+//    typedef  itk::ImageFileWriter< LabelImageWrapper::ImageType  > WriterType;
+//    WriterType::Pointer writer = WriterType::New();
+//    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
+////    writer->SetInput(output);
+//    writer->SetInput(imgSeg);
+//    writer->Update();
+//    cout<<"segmentation result has been saved"<<endl;
 }
 
 void SNAPImageData::SaveSpeedImage()

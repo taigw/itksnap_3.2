@@ -203,7 +203,7 @@ public:
 
     /** */
     /** enter the TRG segmentation mode */
-    void OnTRGModeEnter(); // initialzie theshold
+    void OnTRGModeEnter(); // initialzie theshold, enter brush tool mode
     void OnTRGUpdate(); // region grow with seeds
     void OnTRGFinish(); // finish
   /**

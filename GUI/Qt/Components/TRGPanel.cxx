@@ -43,6 +43,9 @@ void TRGPanel::SetModel(GlobalUIModel *model)
     activateOnFlag(ui->inThreshLowerSpin, m_Model, SnakeWizardModel::UIF_LOWER_THRESHOLD_ENABLED);
     activateOnFlag(ui->inThreshUpperSlider, m_Model, SnakeWizardModel::UIF_UPPER_THRESHOLD_ENABLED);
     activateOnFlag(ui->inThreshUpperSpin, m_Model, SnakeWizardModel::UIF_UPPER_THRESHOLD_ENABLED);
+ 
+    ui->labelSeedTips->setVisible(false);
+    seedExist=false;
 }
 
 void TRGPanel::Initialize()
@@ -54,14 +57,14 @@ void TRGPanel::on_btnSetThreshold_clicked()
 {
     
 }
-void TRGPanel::on_btnAddSeeds_clicked()
-{
-    
-}
-void TRGPanel::on_btnUpdate_clicked()
+void TRGPanel::on_btnStartGrow_clicked()
 {
     m_Model->OnTRGUpdate();
-//    m_Model->OnTRGFinish();
+}
+void TRGPanel::on_btnFinish_clicked()
+{
+//    m_Model->OnTRGUpdate();
+    m_Model->OnTRGFinish();
 //    emit sgl_TRGFinished();
 }
 void TRGPanel::on_btnCancel_clicked()

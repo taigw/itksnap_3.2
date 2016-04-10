@@ -15,6 +15,7 @@
 #include "RFClassificationEngine.h"
 #include "RandomForestClassifier.h"
 #include "RandomForestClassifyImageFilter.h"
+#include <limits>
 
 SnakeWizardModel::SnakeWizardModel()
 {
@@ -1075,16 +1076,40 @@ void SnakeWizardModel::OnTRGModeEnter()
     PreprocessingMode lastMode = m_GlobalState->GetLastUsedPreprocessingMode();
     m_PreprocessingModeModel->SetValue(lastMode);
     
-    //m_Driver->GetSNAPImageData()->ResetSpeedImage();
-    }
+    m_Driver->GetGlobalState()->SetToolbarMode(PAINTBRUSH_MODE);
+}
 
 void SnakeWizardModel::OnTRGUpdate()
 {
-    cout<<"on trg update"<<endl;
-    ApplyPreprocessing();
-//    m_Driver->GetSNAPImageData()->SaveSpeedImage();
-    m_Driver->GetSNAPImageData()->ThresholdSegmentation();
-
+//    LabelImageWrapper *wrpSeg = m_Driver->GetSNAPImageData()->GetSegmentation();
+//    LabelImageWrapper::ImagePointer imgSeg = wrpSeg->GetImage();
+//    typedef itk::ImageRegionConstIterator<LabelImageWrapper::ImageType> LabelIter;
+//    
+//    // We need to iterate throught the label image once to determine the
+//    // number of samples to allocate.
+//    unsigned long nSamples = 0;
+//    for(LabelIter lit(imgSeg, imgSeg->GetBufferedRegion()); !lit.IsAtEnd(); ++lit)
+//        if(lit.Value())
+//            nSamples++;
+//    cout<<"seeds number "<<nSamples<<endl;
+    
+    
+    
+    double upper=0,lower=0;
+    NumericValueRange<double> upperRange,lowerRange;
+    GetThresholdUpperValueAndRange(upper, &upperRange);
+    GetThresholdLowerValueAndRange(lower, &lowerRange);
+    ThresholdSettings::ThresholdMode thresholdMode;//TWO_SIDED=0, LOWER, UPPER
+    GetThresholdModeValue(thresholdMode);
+    if(thresholdMode==ThresholdSettings::LOWER)
+    {
+        upper=1e10;
+    }
+    else if(thresholdMode==ThresholdSettings::UPPER)
+    {
+        lower=-1e10;
+    }
+    m_Driver->GetSNAPImageData()->ThresholdedRegionGrowSegmentation(lower,upper);
 }
 
 void SnakeWizardModel::ComputeBubbleRadiusDefaultAndRange()

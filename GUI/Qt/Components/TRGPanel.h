@@ -24,13 +24,15 @@ signals:
     void sgl_TRGFinished();
 private slots:
     void on_btnSetThreshold_clicked();
-    void on_btnAddSeeds_clicked();
-    void on_btnUpdate_clicked();
+    void on_btnStartGrow_clicked();
+    void on_btnFinish_clicked();
     void on_btnCancel_clicked();
 private:
     Ui::TRGPanel *ui;
     
     GlobalUIModel *m_ParentModel;
     SnakeWizardModel *m_Model;
+    
+    bool seedExist;// indicated whether seeds have been added 
 };
 #endif // TRGPANEL_H
