@@ -228,6 +228,23 @@ IRISApplication
 
   // Initialize the speed image of the SNAP image data
   m_SNAPImageData->InitializeSpeed();
+//    SpeedImageType::Pointer imgNewSpeed=SpeedImageType::New();
+//    imgNewSpeed->SetRegions(imgNewLabel->GetLargestPossibleRegion());
+//    imgNewSpeed->Allocate();
+//    
+//    SpeedImageType::SpacingType spacing=imgNewSpeed->GetSpacing();
+//    SpeedImageType::SpacingType spacing2=imgNewLabel->GetSpacing();
+//    cout<<"spacing "<<spacing[0]<<","<<spacing[1]<<","<<spacing[2]<<endl;
+//    cout<<"spacing2 "<<spacing2[0]<<","<<spacing2[1]<<","<<spacing2[2]<<endl;
+//    typedef itk::ImageRegionIterator<SpeedImageType> SpeedIteratorType;
+//    SpeedIteratorType itSpeed(imgNewSpeed,imgNewSpeed->GetBufferedRegion());
+//    while(!itSpeed.IsAtEnd())
+//    {
+//        itSpeed.Value()=0;
+//        ++itSpeed;
+//    }
+//    m_SNAPImageData->ResetSpeedImage(imgNewSpeed);
+    
 
   // Remember the ROI object
   m_GlobalState->SetSegmentationROISettings(roi);
@@ -283,6 +300,7 @@ IRISApplication
   // Send the speed image to the image data
   m_SNAPImageData->GetSpeed()->SetImage(newSpeedImage);
 
+    cout<<"new speed image updated"<<endl;
   // Save the snake mode 
   m_GlobalState->SetSnakeType(snakeMode);
 

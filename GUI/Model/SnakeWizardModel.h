@@ -182,9 +182,6 @@ public:
 
   /** Called when first displaying the snake wizard */
   void OnSnakeModeEnter();
-
-    /** enter the TRG segmentation mode */
-    void OnTRGModeEnter();
     
   /** Add bubble at cursor */
   void AddBubbleAtCursor();
@@ -205,7 +202,10 @@ public:
   void OnEvolutionPageFinish();
 
     /** */
-    void OnTRGFinish();
+    /** enter the TRG segmentation mode */
+    void OnTRGModeEnter(); // initialzie theshold
+    void OnTRGUpdate(); // region grow with seeds
+    void OnTRGFinish(); // finish
   /**
    * Perform a single step of snake evolution. Returns true if the evolution
    * has converged

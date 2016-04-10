@@ -212,7 +212,9 @@ public:
   irisGetMacro(LevelSetPipelineMutexLock, itk::FastMutexLock *)
 
   //wgt
+    void ResetSpeedImage();
     void ThresholdSegmentation();
+    void SaveSpeedImage();
 protected:
 
   SNAPImageData();

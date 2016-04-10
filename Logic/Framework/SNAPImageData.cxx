@@ -401,6 +401,29 @@ SNAPImageData
 
 }
 
+void SNAPImageData::ResetSpeedImage()
+{
+    SpeedImageType::Pointer speedImg=m_SpeedWrapper->GetImage();
+    SpeedImageType::RegionType region=speedImg->GetBufferedRegion();
+    typedef itk::ImageRegionIteratorWithIndex<SpeedImageType> Iterator;
+    Iterator it(speedImg,speedImg->GetLargestPossibleRegion());
+    it.GoToBegin();
+    while (!it.IsAtEnd())
+    {
+        SpeedImageType::IndexType idx=it.GetIndex();
+        it.Value()=1.0;
+        ++it;
+    }
+    //cout<<"reset speed image"<<endl;
+//    if(m_SpeedWrapper.IsNotNull())
+//    {
+//        m_SpeedWrapper = SpeedImageWrapper::New();
+//        m_SpeedWrapper->SetDefaultNickname("Speed Image");
+//        PushBackImageWrapper(SNAP_ROLE, m_SpeedWrapper.GetPointer());
+//    }
+//   // m_SpeedWrapper->SetImage(speedImg);
+}
+
 void
 SNAPImageData
 ::ThresholdSegmentation()
@@ -408,6 +431,7 @@ SNAPImageData
     //InitializeSegmentation(<#const SnakeParameters &parameters#>, <#const std::vector<Bubble> &bubbles#>, <#unsigned int labelColor#>);
     //InitializeSpeed();
     
+    SpeedImageType::Pointer speedImg = m_SpeedWrapper->GetImage();
     LabelImageType::Pointer labelImg = m_LabelWrapper->GetImage();
     typedef itk::Image<short,3>  MainImageType;
     MainImageType* mainImg= (MainImageType *) m_MainImageWrapper->GetImageBase();
@@ -446,11 +470,22 @@ SNAPImageData
 //            // Set the target value to inside
 //            itTarget.Value() = 1;
 //        }
-        if(itSource.Value()<0)
+        LabelImageType::IndexType idx=itTarget.GetIndex();
+        float speed=speedImg->GetPixel(idx);
+//
+//        if(itSource.Value()<0)
+//        {
+//            itTarget.Value()=0;
+//        }
+//        else{
+//            itTarget.Value()=1;
+//        }
+        if(speed<0)
         {
             itTarget.Value()=0;
         }
-        else{
+        else
+        {
             itTarget.Value()=1;
         }
         
@@ -458,11 +493,12 @@ SNAPImageData
         ++itTarget; ++itSource;
     }
     //SetSegmentationImage(labelImg);
+ 
     
+//    //Threshold Segmentation
 //    typedef itk::Image<short, 3>  ImageType;
-//    typedef itk::Image<unsigned char, 3> LabelType;
-//    ImageType * mainImg=(ImageType *) m_MainImageWrapper->GetImageBase();
-//    
+    typedef itk::Image<unsigned short, 3> LabelType;
+//
 //    typedef itk::BinaryThresholdImageFilter <ImageType, LabelType>
 //    BinaryThresholdImageFilterType;
 //    
@@ -470,18 +506,33 @@ SNAPImageData
 //    = BinaryThresholdImageFilterType::New();
 //    thresholdFilter->SetInput(mainImg);
 //    thresholdFilter->SetLowerThreshold(0);
-//    thresholdFilter->SetUpperThreshold(500);
+//    thresholdFilter->SetUpperThreshold(200);
 //    thresholdFilter->SetInsideValue(1);
 //    thresholdFilter->SetOutsideValue(0);
 //    
 //    thresholdFilter->Update();
 //    LabelType* output=thresholdFilter->GetOutput();
 //    SetSegmentationImage((LabelImageType *)output);
-//    typedef  itk::ImageFileWriter< LabelType  > WriterType;
-//    WriterType::Pointer writer = WriterType::New();
-//    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
+    
+    typedef  itk::ImageFileWriter< LabelType  > WriterType;
+    WriterType::Pointer writer = WriterType::New();
+    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
 //    writer->SetInput(output);
-//    writer->Update();
+    writer->SetInput(labelImg);
+    writer->Update();
+    cout<<"segmentation result has been saved"<<endl;
+}
+
+void SNAPImageData::SaveSpeedImage()
+{
+    SpeedImageType::Pointer speedImg = m_SpeedWrapper->GetImage();
+    typedef  itk::ImageFileWriter< SpeedImageType  > WriterType;
+    WriterType::Pointer writer = WriterType::New();
+    writer->SetFileName("/Users/guotaiwang/Documents/testspeed.nii");
+    writer->SetInput(speedImg);
+    //    writer->SetInput(labelImg);
+    writer->Update();
+    cout<<"speed image has been saved"<<endl;
 }
 
 void 

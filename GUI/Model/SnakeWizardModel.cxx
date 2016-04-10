@@ -1051,20 +1051,21 @@ void SnakeWizardModel::OnSnakeModeEnter()
 
 void SnakeWizardModel::OnTRGModeEnter()
 {
-    // Initialize the image data
-    m_Driver->InitializeSNAPImageData(
-                                      m_Driver->GetGlobalState()->GetSegmentationROISettings(),
-                                      m_Parent->GetProgressCommand());
+    // Initialize the  data
+    m_Driver->InitializeSNAPImageData(m_Driver->GetGlobalState()->GetSegmentationROISettings(),
+                                     m_Parent->GetProgressCommand());
     //m_Driver->InitializeActiveContourPipeline();
-    
+    //try to change the speed image
+    //m_SNAPImageData->GetSpeed()->SetImage(newSpeedImage);
+    //m_Driver->GetSNAPImageData()->ResetSpeedImage();
     m_Driver->SetCurrentImageDataToSNAP();
     
     // Some preparatory stuff
-    this->ComputeBubbleRadiusDefaultAndRange();
+    //this->ComputeBubbleRadiusDefaultAndRange();
     
     // Reset the bubbles
-    m_Driver->GetBubbleArray().clear();
-    m_GlobalState->UnsetActiveBubble();
+    //m_Driver->GetBubbleArray().clear();
+    //m_GlobalState->UnsetActiveBubble();
     
     // We begin in preprocessing mode
     //SetInteractionMode(MODE_PREPROCESSING);
@@ -1074,9 +1075,17 @@ void SnakeWizardModel::OnTRGModeEnter()
     PreprocessingMode lastMode = m_GlobalState->GetLastUsedPreprocessingMode();
     m_PreprocessingModeModel->SetValue(lastMode);
     
-    m_Driver->GetSNAPImageData()->ThresholdSegmentation();
-}
+    //m_Driver->GetSNAPImageData()->ResetSpeedImage();
+    }
 
+void SnakeWizardModel::OnTRGUpdate()
+{
+    cout<<"on trg update"<<endl;
+    ApplyPreprocessing();
+//    m_Driver->GetSNAPImageData()->SaveSpeedImage();
+    m_Driver->GetSNAPImageData()->ThresholdSegmentation();
+
+}
 
 void SnakeWizardModel::ComputeBubbleRadiusDefaultAndRange()
 {
