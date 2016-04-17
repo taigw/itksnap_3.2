@@ -1055,10 +1055,6 @@ void SnakeWizardModel::OnTRGModeEnter()
     // Initialize the  data
     m_Driver->InitializeSNAPImageData(m_Driver->GetGlobalState()->GetSegmentationROISettings(),
                                      m_Parent->GetProgressCommand());
-    //m_Driver->InitializeActiveContourPipeline();
-    //try to change the speed image
-    //m_SNAPImageData->GetSpeed()->SetImage(newSpeedImage);
-    //m_Driver->GetSNAPImageData()->ResetSpeedImage();
     m_Driver->SetCurrentImageDataToSNAP();
     
     // Some preparatory stuff
@@ -1077,24 +1073,11 @@ void SnakeWizardModel::OnTRGModeEnter()
     m_PreprocessingModeModel->SetValue(lastMode);
     
     m_Driver->GetGlobalState()->SetToolbarMode(PAINTBRUSH_MODE);
+    SetThresholdSmoothnessValue(20);
 }
 
 void SnakeWizardModel::OnTRGUpdate()
 {
-//    LabelImageWrapper *wrpSeg = m_Driver->GetSNAPImageData()->GetSegmentation();
-//    LabelImageWrapper::ImagePointer imgSeg = wrpSeg->GetImage();
-//    typedef itk::ImageRegionConstIterator<LabelImageWrapper::ImageType> LabelIter;
-//    
-//    // We need to iterate throught the label image once to determine the
-//    // number of samples to allocate.
-//    unsigned long nSamples = 0;
-//    for(LabelIter lit(imgSeg, imgSeg->GetBufferedRegion()); !lit.IsAtEnd(); ++lit)
-//        if(lit.Value())
-//            nSamples++;
-//    cout<<"seeds number "<<nSamples<<endl;
-    
-    
-    
     double upper=0,lower=0;
     NumericValueRange<double> upperRange,lowerRange;
     GetThresholdUpperValueAndRange(upper, &upperRange);
@@ -1109,7 +1092,9 @@ void SnakeWizardModel::OnTRGUpdate()
     {
         lower=-1e10;
     }
+
     m_Driver->GetSNAPImageData()->ThresholdedRegionGrowSegmentation(lower,upper);
+    m_Driver->InvokeEvent(SegmentationChangeEvent());
 }
 
 void SnakeWizardModel::ComputeBubbleRadiusDefaultAndRange()
@@ -1335,6 +1320,7 @@ void SnakeWizardModel::OnTRGFinish()
 
 //    m_Driver->GetIRISImageData()->SetSegmentationImage(<#LabelImageType *newLabelImage#>)
     m_Driver->ReleaseSNAPImageData();
+    m_Driver->GetGlobalState()->SetToolbarMode(CROSSHAIRS_MODE);
 }
 
 void SnakeWizardModel::OnCancelSegmentation()
@@ -1350,6 +1336,7 @@ void SnakeWizardModel::OnCancelSegmentation()
   // Return to IRIS mode
   m_Driver->SetCurrentImageDataToIRIS();
   m_Driver->ReleaseSNAPImageData();
+  m_Driver->GetGlobalState()->SetToolbarMode(CROSSHAIRS_MODE);
 }
 
 void SnakeWizardModel::RewindEvolution()

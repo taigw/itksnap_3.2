@@ -176,6 +176,8 @@ public:
   const itk::TimeStamp &GetTimeStamp() const { return m_TimeStamp; }
   itk::TimeStamp &GetTimeStamp() { return m_TimeStamp; }
 
+    //wgt
+    LabelType GetLabelValue(){return m_Value;};
 private:
   // The descriptive text of the label
   std::string m_Label;

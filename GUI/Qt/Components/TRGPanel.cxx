@@ -63,9 +63,8 @@ void TRGPanel::on_btnStartGrow_clicked()
 }
 void TRGPanel::on_btnFinish_clicked()
 {
-//    m_Model->OnTRGUpdate();
     m_Model->OnTRGFinish();
-//    emit sgl_TRGFinished();
+    emit sgl_TRGFinished();
 }
 void TRGPanel::on_btnCancel_clicked()
 {

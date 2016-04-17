@@ -210,7 +210,9 @@ IRISApplication
   while(!itLabel.IsAtEnd())
     {
     if(itLabel.Value() != passThroughLabel)
-      itLabel.Value() = (LabelType) 0;
+    {
+      //itLabel.Value() = (LabelType) 0;
+    }
     else
       nCopied++;
     ++itLabel;

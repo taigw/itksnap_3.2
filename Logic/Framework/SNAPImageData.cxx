@@ -107,7 +107,7 @@ SNAPImageData
   InvokeEvent(LayerChangeEvent());
 
   // Here or after it's computed?
-  m_SpeedWrapper->SetAlpha(1.0);
+  m_SpeedWrapper->SetAlpha(0.5);
 }
 
 SpeedImageWrapper* 
@@ -428,100 +428,7 @@ void
 SNAPImageData
 ::ThresholdedRegionGrowSegmentation(double lower, double upper)
 {
-//    //InitializeSegmentation(<#const SnakeParameters &parameters#>, <#const std::vector<Bubble> &bubbles#>, <#unsigned int labelColor#>);
-//    //InitializeSpeed();
-//    
-//    SpeedImageType::Pointer speedImg = m_SpeedWrapper->GetImage();
-//    LabelImageType::Pointer labelImg = m_LabelWrapper->GetImage();
-//    typedef itk::Image<short,3>  MainImageType;
-//    MainImageType* mainImg= (MainImageType *) m_MainImageWrapper->GetImageBase();
-//
-//    
-//    // Get the target region. This really should be a region relative to the IRIS image
-//    // data, not an image into a needless copy of an IRIS region.
-//    LabelImageType::RegionType region = labelImg->GetBufferedRegion();
-//    
-//    // Create iterators to perform the copy
-//    typedef itk::ImageRegionConstIterator<MainImageType> SourceIterator;
-//    typedef itk::ImageRegionIteratorWithIndex<LabelImageType> TargetIterator;
-//    SourceIterator itSource(mainImg,region);
-//    TargetIterator itTarget(labelImg,region);
-//    
-////    // During the copy loop, compute the extents of the initialization
-////    Vector3l bbLower = region.GetSize();
-////    Vector3l bbUpper = region.GetIndex();
-////    
-////    unsigned long nInitVoxels = 0;
-//    
-//    // Convert the input label image into a binary function whose 0 level set
-//    // is the boundary of the current label's region
-//    while(!itSource.IsAtEnd())
-//    {
-////        if(itSource.Value() == m_SnakeColorLabel)
-////        {
-////            // Expand the bounding box accordingly
-////            Vector3l point = itTarget.GetIndex();
-////            bbLower = vector_min(bbLower,point);
-////            bbUpper = vector_max(bbUpper,point);
-////            
-////            // Increase the number of initialization voxels
-////            nInitVoxels++;
-////            
-////            // Set the target value to inside
-////            itTarget.Value() = 1;
-////        }
-//        LabelImageType::IndexType idx=itTarget.GetIndex();
-//        float speed=speedImg->GetPixel(idx);
-////
-////        if(itSource.Value()<0)
-////        {
-////            itTarget.Value()=0;
-////        }
-////        else{
-////            itTarget.Value()=1;
-////        }
-//        if(speed<0)
-//        {
-//            itTarget.Value()=0;
-//        }
-//        else
-//        {
-//            itTarget.Value()=1;
-//        }
-//        
-//        // Go to the next pixel
-//        ++itTarget; ++itSource;
-//    }
-//    //SetSegmentationImage(labelImg);
-// 
-//    
-////    //Threshold Segmentation
-////    typedef itk::Image<short, 3>  ImageType;
-//    typedef itk::Image<unsigned short, 3> LabelType;
-////
-////    typedef itk::BinaryThresholdImageFilter <ImageType, LabelType>
-////    BinaryThresholdImageFilterType;
-////    
-////    BinaryThresholdImageFilterType::Pointer thresholdFilter
-////    = BinaryThresholdImageFilterType::New();
-////    thresholdFilter->SetInput(mainImg);
-////    thresholdFilter->SetLowerThreshold(0);
-////    thresholdFilter->SetUpperThreshold(200);
-////    thresholdFilter->SetInsideValue(1);
-////    thresholdFilter->SetOutsideValue(0);
-////    
-////    thresholdFilter->Update();
-////    LabelType* output=thresholdFilter->GetOutput();
-////    SetSegmentationImage((LabelImageType *)output);
-//    
-//    typedef  itk::ImageFileWriter< LabelType  > WriterType;
-//    WriterType::Pointer writer = WriterType::New();
-//    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
-////    writer->SetInput(output);
-//    writer->SetInput(labelImg);
-//    writer->Update();
-//    cout<<"segmentation result has been saved"<<endl;
-    
+    LabelType fgLabelValue=GetParent()->GetGlobalState()->GetDrawingColorLabel();
     typedef itk::Image<short,3>  MainImageType;
     MainImageType* mainImg= (MainImageType *) m_MainImageWrapper->GetImageBase();
     LabelImageWrapper::ImagePointer imgSeg = GetSegmentation()->GetImage();
@@ -532,16 +439,9 @@ SNAPImageData
     
     for(itTarget.GoToBegin();!itTarget.IsAtEnd();++itTarget)
     {
-        if(itTarget.Get()>0)
+        if(itTarget.Get()==fgLabelValue)
         {
-            double pixelValue=mainImg->GetPixel(itTarget.GetIndex());
-            if(pixelValue>=lower && pixelValue<=upper)
-            {
                 indexList.push_back(itTarget.GetIndex());
-            }
-            else{
-                itTarget.Set(0);
-            }
         }
     }
     
@@ -549,6 +449,7 @@ SNAPImageData
     int yoff[6]={ 0,0,-1,1,0,0};
     int zoff[6]={ 0,0,0,0,-1,1};
     LabelImageWrapper::ImageType::RegionType::SizeType regionSize=imgSeg->GetLargestPossibleRegion().GetSize();
+    
     while(indexList.size()>0)
     {
         IndexType tempidx=indexList[indexList.size()-1];
@@ -561,19 +462,25 @@ SNAPImageData
             neighbourIdx[2]=tempidx[2]+zoff[i];
             if(neighbourIdx[0]>=0 && neighbourIdx[0]<regionSize[0] &&
                neighbourIdx[1]>=0 && neighbourIdx[1]<regionSize[1] &&
-               neighbourIdx[2]>=0 && neighbourIdx[2]<regionSize[2] && imgSeg->GetPixel(neighbourIdx)==0)
+               neighbourIdx[2]>=0 && neighbourIdx[2]<regionSize[2] && imgSeg->GetPixel(neighbourIdx)!=fgLabelValue)
             {
                 double pixelValue=mainImg->GetPixel(neighbourIdx);
                 if(pixelValue>=lower && pixelValue<=upper)
                 {
-                    imgSeg->SetPixel(neighbourIdx, 1);
-                    indexList.push_back(neighbourIdx);
+                    LabelType oldL=imgSeg->GetPixel(neighbourIdx);
+                    LabelType newL=m_Parent->DrawOverLabel(oldL);
+                    if(newL==fgLabelValue)
+                    {
+                        imgSeg->SetPixel(neighbourIdx, fgLabelValue);
+                        indexList.push_back(neighbourIdx);
+                    }
                 }
             }
         }
         
     }
-    
+    imgSeg->Modified();
+//    this->InvokeEvent(SegmentationChangeEvent());
 //    typedef  itk::ImageFileWriter< LabelImageWrapper::ImageType  > WriterType;
 //    WriterType::Pointer writer = WriterType::New();
 //    writer->SetFileName("/Users/guotaiwang/Documents/testseg.nii");
